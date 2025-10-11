@@ -1,14 +1,21 @@
+// src/components/TransactionList.jsx
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function TransactionList() {
+function TransactionList({ transactions: propTransactions }) {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    api.get("transactions/")
-      .then((response) => setTransactions(response.data))
-      .catch((error) => console.error("Error fetching transactions:", error));
-  }, []);
+    if (propTransactions) {
+      // Use transactions passed from parent
+      setTransactions(propTransactions);
+    } else {
+      // Fetch from API if no prop is provided
+      api.get("transactions/")
+        .then((response) => setTransactions(response.data))
+        .catch((error) => console.error("Error fetching transactions:", error));
+    }
+  }, [propTransactions]); // re-run if propTransactions changes
 
   return (
     <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "left" }}>

@@ -1,4 +1,4 @@
-import TransactionList from "./components/TransactionList";
+import TransactionList from "./Components/TransactionList";
 
 function App() {
   return (

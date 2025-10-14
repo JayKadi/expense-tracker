@@ -18,6 +18,9 @@ function TransactionsPage() {
   const handleNewTransaction = (txn) => {
     setTransactions((prev) => [txn, ...prev]);
   };
+  const handleDeleteTransaction = (id) => {
+    setTransactions(prev => prev.filter(txn => txn.id !== id));
+  };
   const totalIncome = transactions
   .filter(txn => txn.type === "income")
   .reduce((sum, txn) => sum + Number(txn.amount), 0);
@@ -57,7 +60,9 @@ const balance = totalIncome - totalExpense;
 
         {/* Right: Transactions List */}
         <div className="md:w-2/3 bg-white shadow rounded-lg p-6"> {/*gives modern card look for both form and list*/}
-          <TransactionList transactions={transactions} />
+          <TransactionList transactions={transactions}
+          onDelete={handleDeleteTransaction} 
+          />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function TransactionList({ transactions: propTransactions }) {
+function TransactionList({ transactions: propTransactions,onDelete  }) {
   const [transactions, setTransactions] = useState([]);
 
  useEffect(() => {
@@ -15,7 +15,16 @@ function TransactionList({ transactions: propTransactions }) {
       .catch((error) => console.error("Error fetching transactions:", error));
   }
 }, [propTransactions]);
-
+ const handleDelete = async (id) => {
+    try {
+      await api.delete(`transactions/${id}/`);
+      // Update local state
+      setTransactions(transactions.filter(txn => txn.id !== id));
+      if (onDelete) onDelete(id); // inform parent if needed
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto mt-6 p-4"> {/*centers content with padding.*/}
@@ -44,6 +53,12 @@ function TransactionList({ transactions: propTransactions }) {
               >
                 {txn.type === "expense" ? "-" : "+"} Ksh {txn.amount}
               </span>
+              <button
+              className="text-red-500 hover:text-red-700 text-sm"
+              onClick={() => onDelete(txn.id)}
+            >
+              🗑 Delete
+            </button>
             </li>
           ))}
         </ul>

@@ -1,47 +1,32 @@
 // src/components/CreateTransaction.jsx
+// src/components/CreateTransaction.jsx
 import { useState } from "react";
 import api from "../services/api";
 
 function CreateTransaction({ onNewTransaction }) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState("expense");
   const [category, setCategory] = useState("");
+  const [type, setType] = useState("expense");
   const [date, setDate] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newTransaction = { title, amount, type, category, date };
-
     try {
-      setLoading(true);
-      const res = await api.post("transactions/", newTransaction);
-      onNewTransaction(res.data);
-      setTitle("");
-      setAmount("");
-      setCategory("");
-      setDate("");
-      setType("expense");
-    } catch (err) {
-      console.error("Error creating transaction:", err);
-      alert("Failed to create transaction.");
-    } finally {
-      setLoading(false);
+      const response = await api.post("transactions/", { title, amount, category, type, date });
+      onNewTransaction(response.data); // Update parent state
+      setTitle(""); setAmount(""); setCategory(""); setType("expense"); setDate("");
+    } catch (error) {
+      console.error("Error creating transaction:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "1rem",
-      marginBottom: "2rem",
-      maxWidth: "600px"
-    }}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4"> 
+      <h2 className="text-xl font-semibold mb-2">Add Transaction</h2>
+
       <input
-        type="text"
+        className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -50,32 +35,43 @@ function CreateTransaction({ onNewTransaction }) {
 
       <input
         type="number"
+        className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
         placeholder="Amount"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         required
       />
 
-      <select value={type} onChange={(e) => setType(e.target.value)}>
+      <input
+        className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        placeholder="Category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        required
+      />
+
+      <select
+        className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+      >
         <option value="expense">Expense</option>
         <option value="income">Income</option>
       </select>
 
       <input
-        type="text"
-        placeholder="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-
-      <input
         type="date"
+        className="border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
         value={date}
         onChange={(e) => setDate(e.target.value)}
+        required
       />
 
-      <button type="submit" disabled={loading}>
-        {loading ? "Adding..." : "Add Transaction"}
+      <button
+        type="submit"
+        className="bg-indigo-500 text-white font-semibold py-2 rounded-md hover:bg-indigo-600 transition"
+      >
+        Add Transaction
       </button>
     </form>
   );

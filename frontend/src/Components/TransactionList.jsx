@@ -1,4 +1,5 @@
 // src/components/TransactionList.jsx
+// src/components/TransactionList.jsx
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
@@ -7,39 +8,40 @@ function TransactionList({ transactions: propTransactions }) {
 
   useEffect(() => {
     if (propTransactions) {
-      // Use transactions passed from parent
       setTransactions(propTransactions);
     } else {
-      // Fetch from API if no prop is provided
       api.get("transactions/")
         .then((response) => setTransactions(response.data))
         .catch((error) => console.error("Error fetching transactions:", error));
     }
-  }, [propTransactions]); // re-run if propTransactions changes
+  }, [propTransactions]);
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "left" }}>
-      <h2>Transactions</h2>
+    <div className="max-w-2xl mx-auto mt-6 p-4"> {/*centers content with padding.*/}
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Transactions</h2>
+
       {transactions.length === 0 ? (
-        <p>No transactions found.</p>
+        <p className="text-gray-500">No transactions found.</p>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <ul className="space-y-4">{/*ensures consistent vertical gaps between cards.*/}
           {transactions.map((txn) => (
             <li
               key={txn.id}
-              style={{
-                backgroundColor: txn.type === "expense" ? "#ffe0e0" : "#e0ffe0",
-                marginBottom: "0.5rem",
-                padding: "1rem",
-                borderRadius: "8px",
-              }}
+              className={`flex justify-between items-center p-4 rounded-lg shadow-md
+                ${txn.type === "expense" ? "bg-red-50" : "bg-green-50"}`}
             >
-              <strong>{txn.title}</strong> — {txn.category}  
-              <span style={{ float: "right" }}>
+              <div>
+                <p className="font-medium text-gray-800">{txn.title}</p>
+                <p className="text-gray-500 text-sm">{txn.category}</p>
+                <p className="text-gray-400 text-xs">{txn.date}</p>
+              </div>
+              <span
+                className={`font-semibold ${
+                  txn.type === "expense" ? "text-red-600" : "text-green-600"
+                }`}
+              >
                 {txn.type === "expense" ? "-" : "+"} Ksh {txn.amount}
               </span>
-              <br />
-              <small>{txn.date}</small>
             </li>
           ))}
         </ul>

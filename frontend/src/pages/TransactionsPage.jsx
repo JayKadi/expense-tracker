@@ -18,6 +18,15 @@ function TransactionsPage() {
   const handleNewTransaction = (txn) => {
     setTransactions((prev) => [txn, ...prev]);
   };
+  const totalIncome = transactions
+  .filter(txn => txn.type === "income")
+  .reduce((sum, txn) => sum + Number(txn.amount), 0);
+
+const totalExpense = transactions
+  .filter(txn => txn.type === "expense")
+  .reduce((sum, txn) => sum + Number(txn.amount), 0);
+
+const balance = totalIncome - totalExpense;
 
   return (
     <div className="max-w-6xl mx-auto p-4">{/*limits width on large screens and centers horizontally.*/}
@@ -31,7 +40,7 @@ function TransactionsPage() {
         </div>
         <div className="bg-red-50 shadow rounded-lg p-4 text-center">
           <p className="text-gray-500 font-medium">Expenses</p>
-          <p className="text-red-600 font-bold text-xl">Ksh {totalExpenses}</p>
+          <p className="text-red-600 font-bold text-xl">Ksh {totalExpense}</p>
         </div>
         <div className="bg-blue-50 shadow rounded-lg p-4 text-center">
           <p className="text-gray-500 font-medium">Balance</p>

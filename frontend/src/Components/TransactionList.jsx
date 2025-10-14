@@ -6,15 +6,16 @@ import api from "../services/api";
 function TransactionList({ transactions: propTransactions }) {
   const [transactions, setTransactions] = useState([]);
 
-  useEffect(() => {
-    if (propTransactions) {
-      setTransactions(propTransactions);
-    } else {
-      api.get("transactions/")
-        .then((response) => setTransactions(response.data))
-        .catch((error) => console.error("Error fetching transactions:", error));
-    }
-  }, [propTransactions]);
+ useEffect(() => {
+  if (propTransactions) {
+    setTransactions(propTransactions);
+  } else {
+    api.get("transactions/")
+      .then((response) => setTransactions(response.data))
+      .catch((error) => console.error("Error fetching transactions:", error));
+  }
+}, [propTransactions]);
+
 
   return (
     <div className="max-w-2xl mx-auto mt-6 p-4"> {/*centers content with padding.*/}
@@ -25,6 +26,7 @@ function TransactionList({ transactions: propTransactions }) {
       ) : (
         <ul className="space-y-4">{/*ensures consistent vertical gaps between cards.*/}
           {transactions.map((txn) => (
+  
             <li
               key={txn.id}
               className={`flex justify-between items-center p-4 rounded-lg shadow-md

@@ -1,10 +1,12 @@
-import TransactionList from "./Components/TransactionList";
+// src/App.jsx
+// src/App.jsx
+// src/App.jsx
+import TransactionsPage from "./pages/TransactionsPage";
 
 function App() {
   return (
-    <div style={{ textAlign: "center", padding: "2rem" }}>
-      <h1>Expense Tracker</h1>
-      <TransactionList />
+    <div className="min-h-screen bg-gray-50">
+      <TransactionsPage />
     </div>
   );
 }

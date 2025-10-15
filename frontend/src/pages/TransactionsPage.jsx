@@ -7,6 +7,8 @@ import EditTransactionModal from "../Components/EditTransactionModal";
 import DeleteConfirmationModal from "../Components/DeleteConfirmationModal";
 import api from "../services/api";
 import { Plus } from "lucide-react";
+import FilterBar from "../Components/FilterBar";
+
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -24,14 +26,30 @@ function TransactionsPage() {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  // 📦 Fetch transactions from backend
-  useEffect(() => {
-    api
-      .get("transactions/")
-      .then((res) => setTransactions(res.data))
-      .catch((err) => console.error(err));
-  }, []);
+   //Filter transactions
+const [filters, setFilters] = useState({ type: "", category: "" });
+useEffect(() => {
+  const fetchTransactions = async () => {
+    try {
+      let query = "transactions/";
+      const params = [];
 
+      if (filters.type) params.push(`type=${filters.type}`);
+      if (filters.category) params.push(`category=${filters.category}`);
+
+      if (params.length > 0) {
+        query += "?" + params.join("&");
+      }
+
+      const res = await api.get(query);
+      setTransactions(res.data);
+    } catch (err) {
+      console.error("Fetch failed:", err);
+    }
+  };
+
+  fetchTransactions();
+}, [filters]);
   // ➕ Add new transaction
   const handleNewTransaction = (txn) => {
     setTransactions((prev) => [txn, ...prev]);
@@ -69,6 +87,7 @@ function TransactionsPage() {
     );
     setIsEditModalOpen(false);
   };
+ 
 
   // 💰 Calculations
   const totalIncome = transactions
@@ -82,7 +101,7 @@ function TransactionsPage() {
   const balance = totalIncome - totalExpense;
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
-
+  
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors relative">
       {/* 🌓 Top Bar */}
@@ -125,14 +144,16 @@ function TransactionsPage() {
           </div>
         </div>
 
-        {/* 📋 Transactions */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors">
-          <TransactionList
-            transactions={transactions}
-            onDelete={handleDeleteTransaction}
-            onEdit={handleEditTransaction}
-          />
-        </div>
+       {/* 📋 Transactions */}
+<div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors">
+  <FilterBar filters={filters} onFilterChange={setFilters} />
+  <TransactionList
+    transactions={transactions}
+    onDelete={handleDeleteTransaction}
+    onEdit={handleEditTransaction}
+  />
+</div>
+
       </div>
 
       {/* ➕ Floating Add Button */}

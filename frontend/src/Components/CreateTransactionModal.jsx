@@ -3,7 +3,19 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
+import { Utensils, Bus, Wallet, Music, ShoppingBag, HeartPulse, GraduationCap, WalletCards, MoreHorizontal } from "lucide-react";
 
+const categoryIcons = {
+  food: <Utensils size={18} />,
+  transport: <Bus size={18} />,
+  bills: <Wallet size={18} />,
+  entertainment: <Music size={18} />,
+  shopping: <ShoppingBag size={18} />,
+  health: <HeartPulse size={18} />,
+  education: <GraduationCap size={18} />,
+  salary: <WalletCards size={18} />,
+  other: <MoreHorizontal size={18} />,
+};
 function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -79,16 +91,30 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
                   onChange={(e) => setAmount(e.target.value)}
                   required
                 />
-
-                <input
-                  className="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full 
-                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                            focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
-                  placeholder="Category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                />
+<div className="flex items-center gap-3">
+  <div className="text-gray-700 dark:text-gray-300">
+    {categoryIcons[category] || <MoreHorizontal size={18} />}
+  </div>
+  <select
+    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md p-2 
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+              focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
+    value={category}
+    onChange={(e) => setCategory(e.target.value)}
+    required
+  >
+    <option value="">Select Category</option>
+    <option value="food">Food</option>
+    <option value="transport">Transport</option>
+    <option value="bills">Bills</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="shopping">Shopping</option>
+    <option value="health">Health</option>
+    <option value="education">Education</option>
+    <option value="salary">Salary</option>
+    <option value="other">Other</option>
+  </select>
+</div>
 
                 <select
                   className="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full 

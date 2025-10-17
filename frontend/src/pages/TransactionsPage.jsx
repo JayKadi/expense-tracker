@@ -26,18 +26,32 @@ function TransactionsPage() {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-   //Filter transactions and pagination
+   //Filter transactions and pagination and infinite scroll
 const [filters, setFilters] = useState({ type: "", category: "", start_date: "", end_date: "" });
 const [page, setPage] = useState(1);
 const [totalPages, setTotalPages] = useState(1);
+const [isLoading, setIsLoading] = useState(false);
+const [hasMore, setHasMore] = useState(true);
+// 🔁 Infinite scroll trigger
+const loadMore = () => {
+  if (!isLoading && hasMore) {
+    setPage((prev) => prev + 1);
+  }
+};
+
+
 // 🔁 Reset page to 1 whenever filters change
 
 useEffect(() => {
   setPage(1);
+  setHasMore(true);
 }, [filters]);
 
 useEffect(() => {
   const fetchTransactions = async () => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
     try {
       let query = `transactions/?page=${page}`;
       const params = [];
@@ -52,16 +66,20 @@ useEffect(() => {
       }
 
       const res = await api.get(query);
+      const newTxns = res.data.results;
 
-      setTransactions(res.data.results); // paginated results
-      setTotalPages(Math.ceil(res.data.count / 10)); // match PAGE_SIZE
+      setTransactions((prev) => page === 1 ? newTxns : [...prev, ...newTxns]);
+      setTotalPages(Math.ceil(res.data.count / 10));
+      setHasMore(res.data.next !== null);
     } catch (err) {
       console.error("Fetch failed:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   fetchTransactions();
-}, [filters, page]);
+}, [page, filters]);
 
   // ➕ Add new transaction
   const handleNewTransaction = (txn) => {
@@ -164,9 +182,7 @@ useEffect(() => {
     transactions={transactions}
     onDelete={handleDeleteTransaction}
     onEdit={handleEditTransaction}
-    page={page}
-    totalPages={totalPages}
-    setPage={setPage}
+    loadMore={loadMore}
   />
 </div>
 

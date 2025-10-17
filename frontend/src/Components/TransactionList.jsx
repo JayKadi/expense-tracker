@@ -1,49 +1,41 @@
 // src/components/TransactionList.jsx
 // src/components/TransactionList.jsx
-import { useEffect, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import api from "../services/api";
 import EditTransactionModal from "./EditTransactionModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Pencil, Trash2 } from "lucide-react";
 
-function TransactionList({ transactions: propTransactions, onDelete, onEdit, page, totalPages, setPage }) {
-  const [transactions, setTransactions] = useState([]);
+
+
+function TransactionList({ transactions, onDelete, onEdit, loadMore }) {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
 
-  useEffect(() => {
-    if (propTransactions) {
-      setTransactions(propTransactions);
-    } else {
-      api
-        .get("transactions/")
-        .then((response) => setTransactions(response.data))
-        .catch((error) => console.error("Error fetching transactions:", error));
-    }
-  }, [propTransactions]);
-
   const handleDelete = async (id) => {
-    try {
-      await api.delete(`transactions/${id}/`);
-      setTransactions(transactions.filter((txn) => txn.id !== id));
-      if (onDelete) onDelete(id);
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-    }
-  };
+  if (onDelete) onDelete(id);
+};
 
   const handleSaveEdit = async (updatedTxn) => {
-    try {
-      await api.put(`transactions/${updatedTxn.id}/`, updatedTxn);
-      const updatedList = transactions.map((txn) =>
-        txn.id === updatedTxn.id ? updatedTxn : txn
-      );
-      setTransactions(updatedList);
-      if (onEdit) onEdit(updatedTxn);
-    } catch (error) {
-      console.error("Error updating transaction:", error);
-    }
-  };
+  if (onEdit) onEdit(updatedTxn);
+};
+
+  //infinite scroll handles page advancement using intersectionobserver
+
+  const observer = useRef();
+
+  const lastTxnRef= useCallback(
+    (node) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loadMore]
+  );
 
   return (
     <div className="max-w-2xl mx-auto mt-6 p-4">
@@ -108,26 +100,6 @@ function TransactionList({ transactions: propTransactions, onDelete, onEdit, pag
           ))}
         </ul>
       )}
-    {/* Pagination Controls */}
-      <div className="flex justify-center mt-6 gap-2">
-      <button
-        disabled={page === 1}
-        onClick={() => setPage((prev) => prev - 1)}
-        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span className="text-gray-700 dark:text-gray-300">
-        Page {page} of {totalPages}
-      </span>
-      <button
-        disabled={page === totalPages}
-        onClick={() => setPage((prev) => prev + 1)}
-        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
       
       {/* EDIT MODAL */}
       {editingTransaction && (

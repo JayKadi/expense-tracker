@@ -6,7 +6,7 @@ import EditTransactionModal from "./EditTransactionModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Pencil, Trash2 } from "lucide-react";
 
-function TransactionList({ transactions: propTransactions, onDelete, onEdit }) {
+function TransactionList({ transactions: propTransactions, onDelete, onEdit, page, totalPages, setPage }) {
   const [transactions, setTransactions] = useState([]);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
@@ -108,7 +108,27 @@ function TransactionList({ transactions: propTransactions, onDelete, onEdit }) {
           ))}
         </ul>
       )}
-
+    {/* Pagination Controls */}
+      <div className="flex justify-center mt-6 gap-2">
+      <button
+        disabled={page === 1}
+        onClick={() => setPage((prev) => prev - 1)}
+        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md disabled:opacity-50"
+      >
+        Previous
+      </button>
+      <span className="text-gray-700 dark:text-gray-300">
+        Page {page} of {totalPages}
+      </span>
+      <button
+        disabled={page === totalPages}
+        onClick={() => setPage((prev) => prev + 1)}
+        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+      
       {/* EDIT MODAL */}
       {editingTransaction && (
   <EditTransactionModal
@@ -137,5 +157,6 @@ function TransactionList({ transactions: propTransactions, onDelete, onEdit }) {
     </div>
   );
 }
+
 
 export default TransactionList;

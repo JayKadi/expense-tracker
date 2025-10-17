@@ -26,30 +26,43 @@ function TransactionsPage() {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-   //Filter transactions
-const [filters, setFilters] = useState({ type: "", category: "" });
+   //Filter transactions and pagination
+const [filters, setFilters] = useState({ type: "", category: "", start_date: "", end_date: "" });
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+// 🔁 Reset page to 1 whenever filters change
+
+useEffect(() => {
+  setPage(1);
+}, [filters]);
+
 useEffect(() => {
   const fetchTransactions = async () => {
     try {
-      let query = "transactions/";
+      let query = `transactions/?page=${page}`;
       const params = [];
 
       if (filters.type) params.push(`type=${filters.type}`);
       if (filters.category) params.push(`category=${filters.category}`);
+      if (filters.start_date) params.push(`start_date=${filters.start_date}`);
+      if (filters.end_date) params.push(`end_date=${filters.end_date}`);
 
       if (params.length > 0) {
-        query += "?" + params.join("&");
+        query += "&" + params.join("&");
       }
 
       const res = await api.get(query);
-      setTransactions(res.data);
+
+      setTransactions(res.data.results); // paginated results
+      setTotalPages(Math.ceil(res.data.count / 10)); // match PAGE_SIZE
     } catch (err) {
       console.error("Fetch failed:", err);
     }
   };
 
   fetchTransactions();
-}, [filters]);
+}, [filters, page]);
+
   // ➕ Add new transaction
   const handleNewTransaction = (txn) => {
     setTransactions((prev) => [txn, ...prev]);
@@ -151,6 +164,9 @@ useEffect(() => {
     transactions={transactions}
     onDelete={handleDeleteTransaction}
     onEdit={handleEditTransaction}
+    page={page}
+    totalPages={totalPages}
+    setPage={setPage}
   />
 </div>
 

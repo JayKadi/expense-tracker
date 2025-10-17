@@ -66,6 +66,37 @@ function FilterBar({ filters, onFilterChange }) {
             ))}
           </select>
         </div>
+        {/* Date Filter */}
+        <div>
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    Start Date
+  </label>
+  <input
+    type="date"
+    className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2
+               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+               focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500
+               transition-colors"
+    value={filters.start_date || ""}
+    onChange={(e) => onFilterChange({ ...filters, start_date: e.target.value })}
+  />
+</div>
+
+<div>
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    End Date
+  </label>
+  <input
+    type="date"
+    className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2
+               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+               focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500
+               transition-colors"
+    value={filters.end_date || ""}
+    onChange={(e) => onFilterChange({ ...filters, end_date: e.target.value })}
+  />
+</div>
+
 
         {/* Clear Filters Button */}
         <div className="flex items-end">

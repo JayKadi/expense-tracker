@@ -194,14 +194,14 @@ useEffect(() => {
   {/* Grid for TransactionList and ChartView */}
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start" >
     {/* Left: TransactionList */}
-<div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-  <TransactionList
-    transactions={transactions}
-    onDelete={handleDeleteTransaction}
-    onEdit={handleEditTransaction}
-    loadMore={loadMore}
-  />
-</div>
+    <div>
+      <TransactionList
+        transactions={transactions}
+        onDelete={handleDeleteTransaction}
+        onEdit={handleEditTransaction}
+        loadMore={loadMore}
+      />
+    </div>
 
     {/* Right: ChartView */}
     <div>

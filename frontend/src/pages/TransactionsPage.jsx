@@ -8,6 +8,7 @@ import DeleteConfirmationModal from "../Components/DeleteConfirmationModal";
 import api from "../services/api";
 import { Plus } from "lucide-react";
 import FilterBar from "../Components/FilterBar";
+import { Sun as SunIcon, Moon as MoonIcon } from "lucide-react";
 
 
 function TransactionsPage() {
@@ -22,9 +23,14 @@ function TransactionsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // 🌙 Apply dark mode to <html>
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+ useEffect(() => {
+  console.log("Dark mode toggled:", darkMode);
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}, [darkMode]);
 
    //Filter transactions and pagination and infinite scroll
 const [filters, setFilters] = useState({ type: "", category: "", start_date: "", end_date: "" });
@@ -48,6 +54,7 @@ useEffect(() => {
 }, [filters]);
 
 useEffect(() => {
+  console.log("Fetching page:", page);
   const fetchTransactions = async () => {
     if (isLoading || !hasMore) return;
 
@@ -77,7 +84,6 @@ useEffect(() => {
       setIsLoading(false);
     }
   };
-
   fetchTransactions();
 }, [page, filters]);
 
@@ -137,13 +143,17 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors relative">
       {/* 🌓 Top Bar */}
       <div className="max-w-6xl mx-auto p-4 flex justify-end">
-        <button
-          onClick={toggleDarkMode}
-          className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md transition"
-        >
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-      </div>
+  <button 
+    onClick={toggleDarkMode}
+    className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+  >
+    {darkMode ? (
+      <SunIcon className="text-yellow-400" size={24} />
+    ) : (
+      <MoonIcon className="text-gray-700" size={24} />
+    )}
+  </button>
+</div>
 
       {/* 🧾 Header */}
       <div className="max-w-6xl mx-auto p-4">
@@ -175,15 +185,24 @@ useEffect(() => {
           </div>
         </div>
 
-       {/* 📋 Transactions */}
-<div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors">
-  <FilterBar filters={filters} onFilterChange={setFilters} />
-  <TransactionList
-    transactions={transactions}
-    onDelete={handleDeleteTransaction}
-    onEdit={handleEditTransaction}
-    loadMore={loadMore}
-  />
+       {/* 📋 Transactions and chart view */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Left: Transactions */}
+  <div>
+    <FilterBar filters={filters} onFilterChange={setFilters} />
+    <TransactionList
+      transactions={transactions}
+      onDelete={handleDeleteTransaction}
+      onEdit={handleEditTransaction}
+      loadMore={loadMore}
+    />
+  </div>
+
+  {/* Right: Chart */}
+  <div>
+    {/* ChartView will go here */}
+    <ChartView data={transactions} />
+  </div>
 </div>
 
       </div>

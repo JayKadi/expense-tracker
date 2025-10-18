@@ -9,7 +9,7 @@ import api from "../services/api";
 import { Plus } from "lucide-react";
 import FilterBar from "../Components/FilterBar";
 import { Sun as SunIcon, Moon as MoonIcon } from "lucide-react";
-
+import ChartView from "../Components/ChartView";
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -186,24 +186,31 @@ useEffect(() => {
         </div>
 
        {/* 📋 Transactions and chart view */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {/* Left: Transactions */}
-  <div>
-    <FilterBar filters={filters} onFilterChange={setFilters} />
-    <TransactionList
-      transactions={transactions}
-      onDelete={handleDeleteTransaction}
-      onEdit={handleEditTransaction}
-      loadMore={loadMore}
-    />
-  </div>
+{/* Outer container */}
+<div className="flex flex-col gap-6">
+  {/* FilterBar stays on top */}
+  <FilterBar filters={filters} onFilterChange={setFilters} />
 
-  {/* Right: Chart */}
-  <div>
-    {/* ChartView will go here */}
-    <ChartView data={transactions} />
+  {/* Grid for TransactionList and ChartView */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start" >
+    {/* Left: TransactionList */}
+<div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <TransactionList
+    transactions={transactions}
+    onDelete={handleDeleteTransaction}
+    onEdit={handleEditTransaction}
+    loadMore={loadMore}
+  />
+</div>
+
+    {/* Right: ChartView */}
+    <div>
+      <ChartView data={transactions} />
+    </div>
   </div>
 </div>
+
+
 
       </div>
 

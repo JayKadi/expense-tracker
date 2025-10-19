@@ -10,10 +10,19 @@ import { Plus } from "lucide-react";
 import FilterBar from "../Components/FilterBar";
 import { Sun as SunIcon, Moon as MoonIcon } from "lucide-react";
 import ChartView from "../Components/ChartView";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { LogOut } from "lucide-react"; // Add this import
 
 function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+
+const handleLogout = () => {
+  logout();
+  window.location.href = "/login";
+};
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -141,18 +150,31 @@ useEffect(() => {
   
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors relative">
-      {/* 🌓 Top Bar */}
-      <div className="max-w-6xl mx-auto p-4 flex justify-end">
-  <button 
-    onClick={toggleDarkMode}
-    className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-  >
-    {darkMode ? (
-      <SunIcon className="text-yellow-400" size={24} />
-    ) : (
-      <MoonIcon className="text-gray-700" size={24} />
-    )}
-  </button>
+     {/* 🌓 Top Bar */}
+<div className="max-w-6xl mx-auto p-4 flex justify-between items-center">
+  <div className="text-gray-700 dark:text-gray-300">
+    Welcome, <span className="font-semibold">{user?.username}</span>
+  </div>
+  
+  <div className="flex gap-2">
+    <button 
+      onClick={toggleDarkMode}
+      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+    >
+      {darkMode ? (
+        <SunIcon className="text-yellow-400" size={24} />
+      ) : (
+        <MoonIcon className="text-gray-700" size={24} />
+      )}
+    </button>
+    
+    <button
+      onClick={handleLogout}
+      className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+    >
+      <LogOut className="text-red-600 dark:text-red-400" size={24} />
+    </button>
+  </div>
 </div>
 
       {/* 🧾 Header */}

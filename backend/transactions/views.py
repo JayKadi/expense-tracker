@@ -1,15 +1,18 @@
 # backend/transactions/views.py
 import json
+import csv
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.http import HttpResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Transaction
 from .serializers import TransactionSerializer
 from django.db.models import Q
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
@@ -65,6 +68,33 @@ class TransactionViewSet(viewsets.ModelViewSet):
             'balance': balance,
             'count': transactions.count()
         })
+    @action(detail=False, methods=['get'])
+    def export_csv(self, request):
+        """Export transactions as CSV"""
+        # Use the same queryset logic (respects filters)
+        transactions = self.get_queryset()
+        
+        # Create the HttpResponse object with CSV header
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="transactions.csv"'
+        
+        # Create CSV writer
+        writer = csv.writer(response)
+        
+        # Write header row
+        writer.writerow(['Date', 'Type', 'Category', 'Amount', 'Description'])
+        
+        # Write data rows
+        for txn in transactions:
+            writer.writerow([
+                txn.date,
+                txn.type.capitalize(),
+                txn.category.capitalize(),
+                txn.amount,
+                txn.description or ''
+            ])
+        
+        return response
 
 # Register endpoint
 @api_view(['POST'])

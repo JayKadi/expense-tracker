@@ -1,7 +1,8 @@
 // src/components/FilterBar.jsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Filter, X, ChevronDown, ChevronUp, Download } from "lucide-react";
+import api from "../services/api";
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },
@@ -19,6 +20,7 @@ const CATEGORIES = [
 function FilterBar({ filters, onFilterChange }) {
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -30,6 +32,57 @@ function FilterBar({ filters, onFilterChange }) {
     onFilterChange({ type: "", category: "", start_date: "", end_date: "", search: "" });
   };
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      // Build query params from filters
+      let query = 'transactions/export_csv/?';
+      const params = [];
+      
+      if (filters.type) params.push(`type=${filters.type}`);
+      if (filters.category) params.push(`category=${filters.category}`);
+      if (filters.start_date) params.push(`start_date=${filters.start_date}`);
+      if (filters.end_date) params.push(`end_date=${filters.end_date}`);
+      if (filters.search) params.push(`search=${filters.search}`);
+      
+      if (params.length > 0) {
+        query += params.join("&");
+      }
+
+      // Get the full URL with token
+      const token = localStorage.getItem("access_token");
+      const baseURL = api.defaults.baseURL;
+      const url = `${baseURL}/${query}`;
+
+      // Fetch with authorization
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export transactions. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const hasActiveFilters = filters.type || filters.category || filters.start_date || filters.end_date || searchTerm;
 
   return (
@@ -39,7 +92,7 @@ function FilterBar({ filters, onFilterChange }) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 mb-6 transition-colors"
     >
-      {/* Search Bar and Filter Toggle */}
+      {/* Search Bar and Buttons */}
       <div className="flex gap-3 mb-4">
         {/* Search Input */}
         <div className="flex-1 relative">
@@ -57,12 +110,25 @@ function FilterBar({ filters, onFilterChange }) {
           />
         </div>
 
+        {/* Export Button */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleExport}
+          disabled={isExporting}
+          className="px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 disabled:bg-green-400
+                   text-white font-medium transition-all flex items-center gap-2 shadow-lg shadow-green-500/30"
+        >
+          <Download size={20} className={isExporting ? "animate-bounce" : ""} />
+          {isExporting ? "Exporting..." : "Export CSV"}
+        </motion.button>
+
         {/* Filter Toggle Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowFilters(!showFilters)}
-          className={`px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-all ${
+          className={`px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-all relative ${
             showFilters || hasActiveFilters
               ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
               : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"

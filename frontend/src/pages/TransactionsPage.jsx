@@ -42,7 +42,7 @@ const handleLogout = () => {
 }, [darkMode]);
 
    //Filter transactions and pagination and infinite scroll
-const [filters, setFilters] = useState({ type: "", category: "", start_date: "", end_date: "" });
+const [filters, setFilters] = useState({ type: "", category: "", start_date: "", end_date: "",search: ""});
 const [page, setPage] = useState(1);
 const [totalPages, setTotalPages] = useState(1);
 const [isLoading, setIsLoading] = useState(false);
@@ -66,24 +66,23 @@ useEffect(() => {
   console.log("Fetching page:", page);
   const fetchTransactions = async () => {
     if (isLoading || !hasMore) return;
-
     setIsLoading(true);
     try {
       let query = `transactions/?page=${page}`;
       const params = [];
-
+      
       if (filters.type) params.push(`type=${filters.type}`);
       if (filters.category) params.push(`category=${filters.category}`);
       if (filters.start_date) params.push(`start_date=${filters.start_date}`);
       if (filters.end_date) params.push(`end_date=${filters.end_date}`);
-
+      if (filters.search) params.push(`search=${filters.search}`);  // ADD THIS
+      
       if (params.length > 0) {
         query += "&" + params.join("&");
       }
-
+      
       const res = await api.get(query);
       const newTxns = res.data.results;
-
       setTransactions((prev) => page === 1 ? newTxns : [...prev, ...newTxns]);
       setTotalPages(Math.ceil(res.data.count / 10));
       setHasMore(res.data.next !== null);

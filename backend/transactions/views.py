@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Transaction
 from .serializers import TransactionSerializer
+from django.db.models import Q
 
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
@@ -17,6 +18,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Users only see their own transactions
         queryset = Transaction.objects.filter(user=self.request.user)
+        
+        # Search by category or description
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(
+                Q(category__icontains=search) | Q(description__icontains=search)
+            )
         
         # Filter by type (income/expense)
         transaction_type = self.request.query_params.get('type', None)
@@ -59,23 +67,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
         })
 
 # Register endpoint
-# Register endpoint
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
     username = request.data.get('username')
-    email = request.data.get('email', '')  # Make email optional
+    email = request.data.get('email', '')
     password = request.data.get('password')
-    
-    # Debug print (remove later)
-    print("Request data:", request.data)
-    print("Username:", username)
-    print("Password:", password)
     
     if not username or not password:
         return Response({
-            'error': 'Username and password required',
-            'received': request.data
+            'error': 'Username and password required'
         }, status=400)
     
     if User.objects.filter(username=username).exists():

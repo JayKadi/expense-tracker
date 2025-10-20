@@ -37,7 +37,7 @@ function LoginPage() {
   const token = credentialResponse.credential;
   console.log("Google token:", token);
 
-  fetch("http://localhost:8000/api/google-login/", {
+  fetch("https://expense-tracker-api-nw3h.onrender.com/api/google-login/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

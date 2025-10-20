@@ -1,7 +1,7 @@
 💰 Expense Tracker
 A full-stack expense tracking application built with Django REST Framework and React,featuring user authentication, transaction management, data visualization, and CSV export capabilities.
 
-Live Demo: https://expense-tracker-kappa-mocha.vercel.app/login | API:[ Backend](https://expense-tracker-api-nw3h.onrender.com)
+Live Demo: expense-tracker-kappa-mocha.vercel.app | API:[ Backend](https://expense-tracker-api-nw3h.onrender.com)
 
 🌟 Features
 Core Functionality

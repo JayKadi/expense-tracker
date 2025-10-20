@@ -12,6 +12,48 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Transaction
 from .serializers import TransactionSerializer
 from django.db.models import Q
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def google_login(request):
+    token = request.data.get('credential')
+    if not token:
+        return Response({'error': 'Missing Google credential'}, status=400)
+
+    try:
+        # Verify token with Google
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            google_requests.Request(),
+            "YOUR_GOOGLE_CLIENT_ID"
+        )
+
+        email = idinfo['email']
+        name = idinfo.get('name', '')
+        username = email.split('@')[0]
+
+        # Create or get user
+        user, created = User.objects.get_or_create(
+            username=email,
+            defaults={'email': email, 'first_name': name}
+        )
+
+        # Issue JWT tokens
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'name': user.first_name
+            }
+        })
+    except Exception as e:
+        return Response({'error': 'Invalid Google token'}, status=400)
 
 
 class TransactionViewSet(viewsets.ModelViewSet):

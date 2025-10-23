@@ -18,44 +18,95 @@ from google.auth.transport import requests as google_requests
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def google_login(request):
+    print("=== GOOGLE LOGIN DEBUG ===")
+    print("1. Request method:", request.method)
+    print("2. Request headers:", dict(request.headers))
+    print("3. Request body (raw):", request.body)
+    print("4. Request data:", request.data)
+    print("5. Content-Type:", request.content_type)
+    
     token = request.data.get('credential')
+    print("6. Extracted token:", token)
+    print("7. Token type:", type(token))
+    
     if not token:
-        return Response({'error': 'Missing Google credential'}, status=400)
-
+        print("ERROR: No token found in request.data")
+        return Response({
+            'error': 'Missing Google credential',
+            'received_data': str(request.data),
+            'received_keys': list(request.data.keys()) if hasattr(request.data, 'keys') else 'N/A'
+        }, status=400)
+    
     try:
-        # Verify token with Google
+        google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
+        print("8. Google Client ID configured:", bool(google_client_id))
+        
+        if not google_client_id:
+            return Response({'error': 'Google Client ID not configured on server'}, status=500)
+        
+        # Verify the Google token
         idinfo = id_token.verify_oauth2_token(
-            token,
-            google_requests.Request(),
-            "YOUR_GOOGLE_CLIENT_ID"
+            token, 
+            google_requests.Request(), 
+            google_client_id
         )
-
-        email = idinfo['email']
-        name = idinfo.get('name', '')
-        username = email.split('@')[0]
-
-        # Create or get user
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={'email': email, 'first_name': name}
-        )
-
-        # Issue JWT tokens
+        
+        print("9. Token verified successfully!")
+        print("10. User info:", idinfo)
+        
+        # Get user info from Google
+        email = idinfo.get('email')
+        first_name = idinfo.get('given_name', '')
+        last_name = idinfo.get('family_name', '')
+        google_id = idinfo.get('sub')
+        
+        if not email:
+            return Response({'error': 'Email not provided by Google'}, status=400)
+        
+        # Check if user exists, create if not
+        try:
+            user = User.objects.get(email=email)
+            print(f"11. Found existing user: {user.username}")
+        except User.DoesNotExist:
+            # Create username from email
+            username = email.split('@')[0]
+            counter = 1
+            original_username = username
+            while User.objects.filter(username=username).exists():
+                username = f"{original_username}{counter}"
+                counter += 1
+            
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name
+            )
+            print(f"11. Created new user: {username}")
+        
+        # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
+        
+        print("12. Login successful!")
+        
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
                 'id': user.id,
                 'username': user.username,
-                'email': user.email,
-                'name': user.first_name
+                'email': user.email
             }
-        })
+        }, status=200)
+        
+    except ValueError as e:
+        print(f"ERROR: Token verification failed: {e}")
+        return Response({'error': f'Invalid Google token: {str(e)}'}, status=400)
     except Exception as e:
-        return Response({'error': 'Invalid Google token'}, status=400)
-
-
+        print(f"ERROR: Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response({'error': f'Server error: {str(e)}'}, status=500)
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]

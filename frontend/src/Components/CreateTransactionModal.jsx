@@ -16,30 +16,48 @@ const categoryIcons = {
   salary: <WalletCards size={18} />,
   other: <MoreHorizontal size={18} />,
 };
+
 function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
-  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("expense");
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
+    const formData = {
+      description,
+      amount: parseFloat(amount),
+      category,
+      type,
+      date,
+    };
+
+    console.log("Submitting transaction:", formData);
+
     try {
-      const response = await api.post("transactions/", {
-        title,
-        amount,
-        category,
-        type,
-        date,
-      });
+      const response = await api.post("transactions/", formData);
+      console.log("Transaction created:", response.data);
       onNewTransaction(response.data);
       onClose();
-      setTitle(""); setAmount(""); setCategory(""); setType("expense"); setDate("");
-    } catch (error) {
-      console.error("Error creating transaction:", error);
+      // Reset form
+      setDescription("");
+      setAmount("");
+      setCategory("");
+      setType("expense");
+      setDate("");
+    } catch (err) {
+      console.error("Error creating transaction:", err);
+      console.error("Error response:", err.response);
+      console.error("Error data:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+      setError(err.response?.data?.error || err.response?.data?.detail || "Failed to create transaction");
     } finally {
       setLoading(false);
     }
@@ -57,7 +75,6 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-
           {/* Modal */}
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -70,19 +87,25 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
                 Add Transaction
               </h2>
 
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded">
+                  {error}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <input
                   className="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full 
                             bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                             focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
+                  placeholder="Description (optional)"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
 
                 <input
                   type="number"
+                  step="0.01"
                   className="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full 
                             bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                             focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
@@ -91,30 +114,31 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
                   onChange={(e) => setAmount(e.target.value)}
                   required
                 />
-<div className="flex items-center gap-3">
-  <div className="text-gray-700 dark:text-gray-300">
-    {categoryIcons[category] || <MoreHorizontal size={18} />}
-  </div>
-  <select
-    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md p-2 
-              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-              focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
-    value={category}
-    onChange={(e) => setCategory(e.target.value)}
-    required
-  >
-    <option value="">Select Category</option>
-    <option value="food">Food</option>
-    <option value="transport">Transport</option>
-    <option value="bills">Bills</option>
-    <option value="entertainment">Entertainment</option>
-    <option value="shopping">Shopping</option>
-    <option value="health">Health</option>
-    <option value="education">Education</option>
-    <option value="salary">Salary</option>
-    <option value="other">Other</option>
-  </select>
-</div>
+
+                <div className="flex items-center gap-3">
+                  <div className="text-gray-700 dark:text-gray-300">
+                    {categoryIcons[category] || <MoreHorizontal size={18} />}
+                  </div>
+                  <select
+                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md p-2 
+                              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                              focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="food">Food</option>
+                    <option value="transport">Transport</option>
+                    <option value="bills">Bills</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="health">Health</option>
+                    <option value="education">Education</option>
+                    <option value="salary">Salary</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
 
                 <select
                   className="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full 
@@ -148,7 +172,7 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition"
+                    className="px-4 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 transition"
                   >
                     {loading ? "Saving..." : "Add"}
                   </button>

@@ -33,29 +33,41 @@ function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
-  const token = credentialResponse.credential;
-  console.log("Google token:", token);
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError("");
 
-  fetch("https://expense-tracker-api-nw3h.onrender.com/api/google-login/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Backend response:", data);
-      // Save JWT or redirect user here
-    })
-    .catch(err => console.error("Login error:", err));
-};
+    console.log("=== GOOGLE LOGIN DEBUG ===");
+    console.log("1. Full credentialResponse:", credentialResponse);
+    console.log("2. Credential value:", credentialResponse.credential);
 
-const handleGoogleError = () => {
-  console.error("Google login failed");
-};
+    try {
+      const response = await api.post("/google-login/", {
+       credential: credentialResponse.credential,
+      });
 
+      console.log("Backend response:", response.data);
+
+      const { access, refresh, user } = response.data;
+
+      localStorage.setItem("access_token", access);
+      localStorage.setItem("refresh_token", refresh);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      navigate("/");
+      window.location.reload();
+    } catch (err) {
+      console.error("Google login error:", err);
+      console.log("Error response data:", err.response?.data);
+      setError(err.response?.data?.error || "Google login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed. Please try again.");
+  };
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>

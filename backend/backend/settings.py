@@ -90,6 +90,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://expense-tracker-kappa-mocha.vercel.app",
+    "https://expense-tracker-git-main-jaykadis-projects.vercel.app",  
+    "https://*.vercel.app",
 ]
 CORS_ALLOW_CREDENTIALS = True
 ROOT_URLCONF = 'backend.urls'

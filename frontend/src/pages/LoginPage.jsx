@@ -180,7 +180,7 @@ function LoginPage() {
       setShowSuccess(true);
       setTimeout(() => {
         navigate("/");
-        window.location.reload();
+       // window.location.reload();//
       }, 1500);
     } catch (err) {
       setError(err.response?.data?.error || "Google login failed. Please try again.");

@@ -1,6 +1,9 @@
 import { createContext, useState, useEffect } from "react";
 import api from "../services/api";
 
+console.log("=== AUTH CONTEXT LOADED ===");
+console.log("API Base URL:", api.defaults.baseURL);
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

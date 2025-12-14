@@ -21,11 +21,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     const response = await api.post("/api/login/", { username, password });
     const { access, refresh, user } = response.data;
-
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
     localStorage.setItem("user", JSON.stringify(user));
-
     setUser(user);
     return user;
   };
@@ -33,11 +31,20 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     const response = await api.post("/api/register/", { username, email, password });
     const { access, refresh, user } = response.data;
-
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
     localStorage.setItem("user", JSON.stringify(user));
+    setUser(user);
+    return user;
+  };
 
+  // ADD THIS FUNCTION - Google Login
+  const googleLogin = async (credential) => {
+    const response = await api.post("/api/google-login/", { token: credential });
+    const { access, refresh, user } = response.data;
+    localStorage.setItem("access_token", access);
+    localStorage.setItem("refresh_token", refresh);
+    localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
     return user;
   };
@@ -49,8 +56,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // ADD googleLogin TO THE PROVIDER VALUE
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, googleLogin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -138,7 +138,7 @@ function LoginPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [shake, setShake] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const { login, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -163,34 +163,24 @@ function LoginPage() {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await api.post("/api/google-login/", {
-        credential: credentialResponse.credential,
-      });
-
-      const { access, refresh, user } = response.data;
-
-      localStorage.setItem("access_token", access);
-      localStorage.setItem("refresh_token", refresh);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      setShowSuccess(true);
-      setTimeout(() => {
-        navigate("/");
-       // window.location.reload()
-      }, 1500);
-    } catch (err) {
-      setError(err.response?.data?.error || "Google login failed. Please try again.");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  setLoading(true);
+  setError("");
+  try {
+    // Use googleLogin from AuthContext instead of direct API call
+    await googleLogin(credentialResponse.credential);
+    
+    setShowSuccess(true);
+    setTimeout(() => {
+      window.location.href = "/"; // Use this instead of navigate
+    }, 1500);
+  } catch (err) {
+    setError(err.response?.data?.error || "Google login failed. Please try again.");
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleGoogleError = () => {
     setError("Google login failed. Please try again.");
     setShake(true);

@@ -39,15 +39,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ADD THIS FUNCTION - Google Login
-  const googleLogin = async (credential) => {
-    const response = await api.post("/api/google-login/", { token: credential });
-    const { access, refresh, user } = response.data;
-    localStorage.setItem("access_token", access);
-    localStorage.setItem("refresh_token", refresh);
-    localStorage.setItem("user", JSON.stringify(user));
-    setUser(user);
-    return user;
-  };
+ const googleLogin = async (credential) => {
+  const response = await api.post("/api/google-login/", { 
+    credential: credential  // Changed from "token" to "credential"
+  });
+  const { access, refresh, user } = response.data;
+  localStorage.setItem("access_token", access);
+  localStorage.setItem("refresh_token", refresh);
+  localStorage.setItem("user", JSON.stringify(user));
+  setUser(user);
+  return user;
+};
 
   const logout = () => {
     localStorage.removeItem("access_token");

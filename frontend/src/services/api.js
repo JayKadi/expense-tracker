@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Remove /api from here since your endpoints already include it
-const API_URL = import.meta.env.VITE_API_URL || "https://expense-tracker-api-nw3h.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://expense-tracker-production-8118.up.railway.app";
 
 const api = axios.create({
   baseURL: API_URL,

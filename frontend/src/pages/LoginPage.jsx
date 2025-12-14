@@ -167,7 +167,7 @@ function LoginPage() {
     setError("");
 
     try {
-      const response = await api.post("/google-login/", {
+      const response = await api.post("/api/google-login/", {
         credential: credentialResponse.credential,
       });
 

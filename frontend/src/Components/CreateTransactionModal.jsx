@@ -42,7 +42,7 @@ function CreateTransactionModal({ isOpen, onClose, onNewTransaction }) {
     console.log("Submitting transaction:", formData);
 
     try {
-      const response = await api.post("transactions/", formData);
+      const response = await api.post("/api/transactions/", formData);
       console.log("Transaction created:", response.data);
       onNewTransaction(response.data);
       onClose();

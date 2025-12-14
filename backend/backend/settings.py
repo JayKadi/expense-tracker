@@ -46,7 +46,9 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.onrender.com',
-    'expense-tracker-kappa-mocha.vercel.app',  # Replace with your actual Vercel domain
+    '.railway.app',
+    'expense-tracker-kappa-mocha.vercel.app', 
+    'expense-tracker-production-8118.up.railway.app',  # Replace with your actual Vercel domain
 ]
 # Application definition
 
